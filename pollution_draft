@@ -1,0 +1,193 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyMLcV8/ziaGJB2GxT6mU091",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Sohamk22/Atmos_CommunityBot/blob/main/pollution_draft\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": 2,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "61NSmBeq_stv",
+        "outputId": "cd43570d-d1bc-4131-b420-7a0722b2094f"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requirement already satisfied: flask in /usr/local/lib/python3.11/dist-packages (3.1.0)\n",
+            "Requirement already satisfied: plotly in /usr/local/lib/python3.11/dist-packages (5.24.1)\n",
+            "Requirement already satisfied: Werkzeug>=3.1 in /usr/local/lib/python3.11/dist-packages (from flask) (3.1.3)\n",
+            "Requirement already satisfied: Jinja2>=3.1.2 in /usr/local/lib/python3.11/dist-packages (from flask) (3.1.6)\n",
+            "Requirement already satisfied: itsdangerous>=2.2 in /usr/local/lib/python3.11/dist-packages (from flask) (2.2.0)\n",
+            "Requirement already satisfied: click>=8.1.3 in /usr/local/lib/python3.11/dist-packages (from flask) (8.1.8)\n",
+            "Requirement already satisfied: blinker>=1.9 in /usr/local/lib/python3.11/dist-packages (from flask) (1.9.0)\n",
+            "Requirement already satisfied: tenacity>=6.2.0 in /usr/local/lib/python3.11/dist-packages (from plotly) (9.0.0)\n",
+            "Requirement already satisfied: packaging in /usr/local/lib/python3.11/dist-packages (from plotly) (24.2)\n",
+            "Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/lib/python3.11/dist-packages (from Jinja2>=3.1.2->flask) (3.0.2)\n"
+          ]
+        }
+      ],
+      "source": [
+        "pip install flask plotly"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from flask import Flask, render_template, request\n",
+        "import plotly.graph_objs as go\n",
+        "import plotly.offline as pyo\n",
+        "\n",
+        "app = Flask(__name__)\n",
+        "\n",
+        "@app.route('/')\n",
+        "def index():\n",
+        "    return render_template('index.html')\n",
+        "\n",
+        "@app.route('/simulate', methods=['POST'])\n",
+        "def simulate():\n",
+        "    # Get parameters from the form\n",
+        "    wind_speed = float(request.form['wind_speed'])\n",
+        "    traffic_density = float(request.form['traffic_density'])\n",
+        "    industrial_emissions = float(request.form['industrial_emissions'])\n",
+        "    humidity = float(request.form['humidity'])\n",
+        "    temperature = float(request.form['temperature'])\n",
+        "    rainfall = float(request.form['rainfall'])\n",
+        "    green_spaces = float(request.form['green_spaces'])\n",
+        "\n",
+        "    # Calculate pollution level\n",
+        "    base_level = 50  # Example base level\n",
+        "    pollution_level = (base_level + (wind_speed * 0.1) + (traffic_density * 0.2) +\n",
+        "                       (industrial_emissions * 0.3) - (humidity * 0.05) +\n",
+        "                       (temperature * 0.02) - (rainfall * 0.1) - (green_spaces * 0.08))\n",
+        "\n",
+        "    # Create a graph\n",
+        "    fig = go.Figure(data=go.Scatter(x=[0, 1], y=[base_level, pollution_level], mode='lines+markers'))\n",
+        "    fig.update_layout(title='Pollution Level Simulation', xaxis_title='Time', yaxis_title='Pollution Level')\n",
+        "    graph_div = pyo.plot(fig, auto_open=False, output_type='div')\n",
+        "\n",
+        "    return render_template('result.html', graph_div=graph_div, pollution_level=pollution_level)\n",
+        "\n",
+        "if __name__ == '__main__':\n",
+        "    app.run(debug=True)\n"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "bdwxeVTY_x9l",
+        "outputId": "196257de-7f16-462e-ea6a-4d16d6990ad8"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            " * Serving Flask app '__main__'\n",
+            " * Debug mode: on\n"
+          ]
+        },
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "INFO:werkzeug:\u001b[31m\u001b[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.\u001b[0m\n",
+            " * Running on http://127.0.0.1:5000\n",
+            "INFO:werkzeug:\u001b[33mPress CTRL+C to quit\u001b[0m\n",
+            "INFO:werkzeug: * Restarting with stat\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "<!DOCTYPE html>\n",
+        "<html lang=\"en\">\n",
+        "<head>\n",
+        "    <meta charset=\"UTF-8\">\n",
+        "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n",
+        "    <title>Pollution Simulation</title>\n",
+        "</head>\n",
+        "<body>\n",
+        "    <h1>Pollution Simulation</h1>\n",
+        "    <form action=\"/simulate\" method=\"post\">\n",
+        "        <label for=\"wind_speed\">Wind Speed:</label>\n",
+        "        <input type=\"number\" id=\"wind_speed\" name=\"wind_speed\" step=\"0.1\"><br>\n",
+        "        <label for=\"traffic_density\">Traffic Density:</label>\n",
+        "        <input type=\"number\" id=\"traffic_density\" name=\"traffic_density\"><br>\n",
+        "        <label for=\"industrial_emissions\">Industrial Emissions:</label>\n",
+        "        <input type=\"number\" id=\"industrial_emissions\" name=\"industrial_emissions\"><br>\n",
+        "        <label for=\"humidity\">Humidity:</label>\n",
+        "        <input type=\"number\" id=\"humidity\" name=\"humidity\" step=\"0.1\"><br>\n",
+        "        <label for=\"temperature\">Temperature:</label>\n",
+        "        <input type=\"number\" id=\"temperature\" name=\"temperature\" step=\"0.1\"><br>\n",
+        "        <label for=\"rainfall\">Rainfall:</label>\n",
+        "        <input type=\"number\" id=\"rainfall\" name=\"rainfall\" step=\"0.1\"><br>\n",
+        "        <label for=\"green_spaces\">Green Spaces:</label>\n",
+        "        <input type=\"number\" id=\"green_spaces\" name=\"green_spaces\"><br>\n",
+        "        <button type=\"submit\">Simulate</button>\n",
+        "    </form>\n",
+        "</body>\n",
+        "</html>\n"
+      ],
+      "metadata": {
+        "id": "li_DeQwW_0qD"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "<!DOCTYPE html>\n",
+        "<html lang=\"en\">\n",
+        "<head>\n",
+        "    <meta charset=\"UTF-8\">\n",
+        "    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n",
+        "    <title>Simulation Result</title>\n",
+        "</head>\n",
+        "<body>\n",
+        "    <h1>Simulation Result</h1>\n",
+        "    <p>Pollution Level: {{ pollution_level }}</p>\n",
+        "    {{ graph_div|safe }}\n",
+        "    <a href=\"/\">Simulate Again</a>\n",
+        "</body>\n",
+        "</html>\n"
+      ],
+      "metadata": {
+        "id": "vGBGuI-N_27U"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
